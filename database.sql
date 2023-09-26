@@ -3,3 +3,5 @@ use belajar_laravel_elequent;
 show tables;
 select * from categories;
 select * from vouchers;
+describe comments;
+select * from comments;
