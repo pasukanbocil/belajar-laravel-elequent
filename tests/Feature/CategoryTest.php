@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\Scopes\IsActiveScope;
 use Database\Seeders\CategorySeeder;
+use Database\Seeders\ProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -170,8 +173,8 @@ class CategoryTest extends TestCase
         $this->seed(CategorySeeder::class);
 
         $request = [
-            "name"=>"Food Updated",
-            "description"=>"Food Category Updated"
+            "name" => "Food Updated",
+            "description" => "Food Category Updated"
         ];
 
         $category = Category::find("FOOD");
@@ -180,5 +183,68 @@ class CategoryTest extends TestCase
 
 
         self::assertNotNull($category->id);
+    }
+
+    public function testGlovalScope()
+    {
+        $category = new Category();
+        $category->id = "FOOD";
+        $category->name = "Food";
+        $category->description = "Food Category";
+        $category->is_acttive = false;
+        $category->save();
+
+        $category = Category::find("FOOD");
+        self::assertNull($category);
+
+        $category = Category::withoutGlobalScopes([IsActiveScope::class])->find("FOOD");
+        self::assertNotNull($category);
+    }
+
+    public function testOneToMany()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        $category = Category::find("FOOD");
+        self::assertNotNull($category);
+
+        // $products = Product::where("category_id", $category->id)->get();
+        $products = $category->products;
+        self::assertNotNull($products);
+        self::assertCount(1, $products);
+    }
+
+    public function testOneToManyQuery()
+    {
+        $category = new Category();
+        $category->id = "FOOD";
+        $category->name = "FOOD Bakery";
+        $category->description = "Menyediakan Segala Macam Food Bakery";
+        $category->is_acttive = true;
+        $category->save();
+
+        $product = new Product();
+        $product->id = "1";
+        $product->name = "Roti O";
+        $product->description = "Roti O Yang Sangat Enak Sekali";
+        
+        $category->products()->save($product);
+
+        self::assertNotNull($product->category_id);
+    }
+
+    public function testRelationshipQuery()
+    {
+        $this->seed([CategorySeeder::class,ProductSeeder::class]);
+
+
+        $category = Category::find("FOOD");
+        $products = $category->products;
+        self::assertCount(1,$products);
+
+
+        $outOfStockProducts = $category->products()->where("stock","<=",0)->get();
+        self::assertCount(1,$outOfStockProducts);
+
     }
 }

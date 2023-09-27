@@ -46,4 +46,18 @@ class VoucherTest extends TestCase
         $voucher = Voucher::withTrashed()->where('name', '=', 'Sample Diskon Voucher')->first();
         self::assertNotNull($voucher);
     }
+
+    public function testLocalScope()
+    {
+        $voucher = new Voucher();
+        $voucher->name = "Sample Voucher";
+        $voucher->is_active = true;
+        $voucher->save();
+
+        $total = Voucher::active()->count();
+        self::assertEquals(1, $total);
+
+        $total = Voucher::nonActive()->count();
+        self::assertEquals(0, $total);
+    }
 }
