@@ -6,7 +6,9 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Scopes\IsActiveScope;
 use Database\Seeders\CategorySeeder;
+use Database\Seeders\CustomerSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\ReviewSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -227,7 +229,7 @@ class CategoryTest extends TestCase
         $product->id = "1";
         $product->name = "Roti O";
         $product->description = "Roti O Yang Sangat Enak Sekali";
-        
+
         $category->products()->save($product);
 
         self::assertNotNull($product->category_id);
@@ -235,16 +237,32 @@ class CategoryTest extends TestCase
 
     public function testRelationshipQuery()
     {
-        $this->seed([CategorySeeder::class,ProductSeeder::class]);
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
 
 
         $category = Category::find("FOOD");
         $products = $category->products;
-        self::assertCount(1,$products);
+        self::assertCount(1, $products);
 
 
-        $outOfStockProducts = $category->products()->where("stock","<=",0)->get();
-        self::assertCount(1,$outOfStockProducts);
+        $outOfStockProducts = $category->products()->where("stock", "<=", 0)->get();
+        self::assertCount(1, $outOfStockProducts);
+    }
 
+    public function testHasManyThourgh()
+    {
+        $this->seed([
+            CategorySeeder::class,
+            ProductSeeder::class,
+            CustomerSeeder::class,
+            ReviewSeeder::class,
+        ]);
+
+        $category = Category::find("FOOD");
+        self::assertNotNull($category);
+
+        $reviews = $category->reviews;
+        self::assertNotNull($reviews);
+        self::assertCount(2, $reviews);
     }
 }
