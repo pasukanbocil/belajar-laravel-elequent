@@ -3,14 +3,15 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use App\Models\Category;
 use App\Models\Product;
-use Database\Seeders\ProductSeeder;
-use Database\Seeders\CategorySeeder;
-use Database\Seeders\CommentSeeder;
-use Database\Seeders\ImageSeeder;
+use App\Models\Category;
 use Database\Seeders\TagSeeder;
+use Database\Seeders\ImageSeeder;
+use Database\Seeders\CommentSeeder;
+use Database\Seeders\ProductSeeder;
 use Database\Seeders\VoucherSeeder;
+use Illuminate\Support\Facades\Log;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -75,7 +76,7 @@ class ProductTest extends TestCase
 
         $comments = $product->comments;
         foreach ($comments as $comment) {
-            self::assertEquals(Product::class, $comment->commentable_type);
+            self::assertEquals('product', $comment->commentable_type);
             self::assertEquals($product->id, $comment->commentable_id);
         }
     }
@@ -120,5 +121,43 @@ class ProductTest extends TestCase
             self::assertNotNull($vouchers);
             self::assertCount(1, $vouchers);
         }
+    }
+
+    public function testEloquentCollection()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        // 2 product 1,2
+        $products = Product::query()->get();
+
+        // where id in 1,2
+
+        $products = $products->toQuery()->where('price', 18000)->get();
+
+        self::assertNotNull($products);
+        self::assertNotNull("2", $products[0]->id);
+    }
+
+    public function testSerialization()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        $products = Product::query()->get();
+        self::assertCount(2, $products);
+
+        $json = $products->toJson(JSON_PRETTY_PRINT);
+        Log::info($json);
+    }
+
+    public function testSerializationRelation()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class, ImageSeeder::class]);
+
+        $products = Product::query()->get();
+        $products->load((['category', 'image']));
+        self::assertCount(2, $products);
+
+        $json = $products->toJson(JSON_PRETTY_PRINT);
+        Log::info($json);
     }
 }

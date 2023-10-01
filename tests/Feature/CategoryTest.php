@@ -31,7 +31,8 @@ class CategoryTest extends TestCase
         for ($i = 0; $i < 10; $i++) {
             $categories[] = [
                 "id" => "ID $i",
-                "name" => "Name $i"
+                "name" => "Name $i",
+                'is_acttive' => true
             ];
         }
 
@@ -76,6 +77,7 @@ class CategoryTest extends TestCase
             $category = new Category();
             $category->id = "ID $i";
             $category->name = "Name $i";
+            $category->is_acttive = true;
             $category->save();
         }
 
@@ -95,7 +97,8 @@ class CategoryTest extends TestCase
         for ($i = 0; $i < 10; $i++) {
             $categories[] = [
                 "id" => "ID $i",
-                "name" => "Name $i"
+                "name" => "Name $i",
+                "is_acttive"=>true
             ];
         }
 
@@ -127,7 +130,8 @@ class CategoryTest extends TestCase
         for ($i = 0; $i < 10; $i++) {
             $categories[] = [
                 "id" => "ID $i",
-                "name" => "Name $i"
+                "name" => "Name $i",
+                "is_acttive"=>true
             ];
         }
 
@@ -213,7 +217,7 @@ class CategoryTest extends TestCase
         // $products = Product::where("category_id", $category->id)->get();
         $products = $category->products;
         self::assertNotNull($products);
-        self::assertCount(1, $products);
+        self::assertCount(2, $products);
     }
 
     public function testOneToManyQuery()
@@ -242,11 +246,11 @@ class CategoryTest extends TestCase
 
         $category = Category::find("FOOD");
         $products = $category->products;
-        self::assertCount(1, $products);
+        self::assertCount(2, $products);
 
 
         $outOfStockProducts = $category->products()->where("stock", "<=", 0)->get();
-        self::assertCount(1, $outOfStockProducts);
+        self::assertCount(2, $outOfStockProducts);
     }
 
     public function testHasManyThourgh()
@@ -289,7 +293,7 @@ class CategoryTest extends TestCase
         self::assertEquals(2, $product);
 
         $category = Category::find("FOOD");
-        $product = $category->products()->where("price",18000)->count();
+        $product = $category->products()->where("price", 18000)->count();
 
         self::assertEquals(1, $product);
     }

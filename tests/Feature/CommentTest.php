@@ -15,6 +15,8 @@ class CommentTest extends TestCase
         $comment->email = "dickysph@gmail.com";
         $comment->title = "Sample Title";
         $comment->comment = "Sample Comment";
+        $comment->commentable_id = "1";
+        $comment->commentable_type = "product";
 
         $comment->save();
 
@@ -25,6 +27,8 @@ class CommentTest extends TestCase
     {
         $comment = new Comment();
         $comment->email = "dickysph@gmail.com";
+        $comment->commentable_id = "1";
+        $comment->commentable_type = "product";
 
         $comment->save();
 
