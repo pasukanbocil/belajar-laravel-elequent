@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Product extends Model
 {
@@ -36,5 +39,32 @@ class Product extends Model
             'customer_id'
         )->withPivot('created_at')
             ->using(Like::class);
+    }
+
+    public function image(): MorphOne
+    {
+        return $this->morphOne(Image::class, "imageable");
+    }
+
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, "commentable");
+    }
+
+    public function latestComment(): MorphOne
+    {
+        return $this->morphOne(Comment::class, "commentable")
+            ->latest("created_at");
+    }
+
+    public function oldestComment(): MorphOne
+    {
+        return $this->morphOne(Comment::class, "commentable")
+            ->oldest("created_at");
+    }
+
+    public function tags(): MorphToMany
+    {
+        return $this->morphToMany(Tag::class, "taggable");
     }
 }

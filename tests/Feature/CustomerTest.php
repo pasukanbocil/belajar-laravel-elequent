@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Wallet;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\CustomerSeeder;
+use Database\Seeders\ImageSeeder;
 use Database\Seeders\ProductSeeder;
 use Database\Seeders\VirtualAcountSeeder;
 use Database\Seeders\WalletSeeder;
@@ -138,5 +139,45 @@ class CustomerTest extends TestCase
 
             self::assertNotNull($pivot->product);
         }
+    }
+
+    public function testOneToOnePolymorphic()
+    {
+        $this->seed([
+            CustomerSeeder::class,
+            ImageSeeder::class
+        ]);
+
+        $customer = Customer::find("DICKY");
+        self::assertNotNull($customer);
+
+        $image = $customer->image;
+        self::assertNotNull($image);
+
+        self::assertEquals("https://www.dicky.com/image/1.jpg", $image->url);
+    }
+
+    public function testEager()
+    {
+        $this->seed([
+            CustomerSeeder::class,
+            WalletSeeder::class,
+            ImageSeeder::class
+        ]);
+
+        $customer = Customer::with(["wallet", "image"])->find("DICKY");
+        self::assertNotNull($customer);
+    }
+
+    public function testEagerModel()
+    {
+        $this->seed([
+            CustomerSeeder::class,
+            WalletSeeder::class,
+            ImageSeeder::class
+        ]);
+
+        $customer = Customer::find("DICKY");
+        self::assertNotNull($customer);
     }
 }
